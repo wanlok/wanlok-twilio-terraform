@@ -8,7 +8,7 @@ interface Context {
 interface Event {
   request: {
     headers: {
-      authorization: string;
+      authorization?: string;
     };
   };
   data?: {
@@ -21,27 +21,42 @@ interface Event {
   };
 }
 
+const approve = async (context: Context, event: Event) => {
+  const phoneNumber = event.data?.details.authenticator.phone_number;
+  if (!phoneNumber) {
+    return false;
+  }
+  const basicAuth = Buffer.from(`${context.ACCOUNT_SID}:${context.AUTH_TOKEN}`).toString('base64');
+  const url = `https://verify.twilio.com/v2/Services/${context.TWILIO_VERIFY_SID}/Verifications/${phoneNumber}`;
+  const params = new URLSearchParams();
+  params.append('Status', 'approved');
+  await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${basicAuth}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: params.toString(),
+  });
+  return true;
+};
+
 exports.handler = async (context: Context, event: Event, callback: Function) => {
   if (event.request.headers.authorization !== context.AUTH0_SECRET) {
     const response = new Twilio.Response();
     response.setStatusCode(401);
-    response.setBody({ message: 'Unauthorized' });
+    response.setBody(JSON.stringify({ message: 'Unauthorized' }));
     return callback(null, response);
   }
+  let message: string;
   if (event.data?.type === 'gd_auth_succeed') {
-    const phoneNumber = event.data.details.authenticator.phone_number;
-    const basicAuth = Buffer.from(`${context.ACCOUNT_SID}:${context.AUTH_TOKEN}`).toString('base64');
-    const twilioUrl = `https://verify.twilio.com/v2/Services/${context.TWILIO_VERIFY_SID}/Verifications/${phoneNumber}`;
-    const twilioBody = new URLSearchParams();
-    twilioBody.append('Status', 'approved');
-    await fetch(twilioUrl, {
-      method: 'POST',
-      headers: {
-        Authorization: `Basic ${basicAuth}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: twilioBody.toString(),
-    });
+    const approved = await approve(context, event);
+    message = approved ? 'Approved' : 'Invalid phone number';
+  } else {
+    message = 'Ignored';
   }
-  return callback(null, { statusCode: 200, success: true });
+  const response = new Twilio.Response();
+  response.setStatusCode(200);
+  response.setBody(JSON.stringify({ message }));
+  return callback(null, response);
 };
