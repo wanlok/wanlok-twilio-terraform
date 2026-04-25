@@ -1,0 +1,13 @@
+{
+  "name": "wanlok-twilio-terraform",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@twilio-labs/serverless-runtime-types": "^4.0.1",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "deploy": "tsc && terraform apply -auto-approve"
+  }
+}
