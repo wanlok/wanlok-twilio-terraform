@@ -1,7 +1,7 @@
-interface Context {
+import { Context as TwilioContext } from '@twilio-labs/serverless-runtime-types/types';
+
+interface Context extends TwilioContext {
   AUTH0_SECRET: string;
-  ACCOUNT_SID: string;
-  AUTH_TOKEN: string;
   TWILIO_VERIFY_SID: string;
 }
 
@@ -26,19 +26,16 @@ const approve = async (context: Context, event: Event) => {
   if (!phoneNumber) {
     return false;
   }
-  const basicAuth = Buffer.from(`${context.ACCOUNT_SID}:${context.AUTH_TOKEN}`).toString('base64');
-  const url = `https://verify.twilio.com/v2/Services/${context.TWILIO_VERIFY_SID}/Verifications/${phoneNumber}`;
-  const params = new URLSearchParams();
-  params.append('Status', 'approved');
-  await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Basic ${basicAuth}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: params.toString(),
-  });
-  return true;
+  try {
+    const client = context.getTwilioClient();
+    const verification = await client.verify.v2
+      .services(context.TWILIO_VERIFY_SID)
+      .verifications(phoneNumber)
+      .update({ status: 'approved' });
+    return verification.status === 'approved';
+  } catch (error) {
+    return false;
+  }
 };
 
 exports.handler = async (context: Context, event: Event, callback: Function) => {
@@ -51,7 +48,7 @@ exports.handler = async (context: Context, event: Event, callback: Function) => 
   let message: string;
   if (event.data?.type === 'gd_auth_succeed') {
     const approved = await approve(context, event);
-    message = approved ? 'Approved' : 'Invalid phone number';
+    message = approved ? 'Approved' : 'Invalid phone number or request already approved';
   } else {
     message = 'Ignored';
   }
