@@ -14,17 +14,17 @@ provider "twilio" {
   api_secret  = var.twilio_api_secret
 }
 
-variable "twilio_account_sid" { type = string }
-variable "twilio_auth_token"  { type = string }
-variable "twilio_api_key"     { type = string }
-variable "twilio_api_secret"  { type = string }
-variable "twilio_verify_sid"  { type = string }
-variable "auth0_secret"       { type = string }
-variable "name"               { type = string }
+variable "twilio_account_sid"   { type = string }
+variable "twilio_auth_token"    { type = string }
+variable "twilio_api_key"       { type = string }
+variable "twilio_api_secret"    { type = string }
+variable "twilio_verify_sid"    { type = string }
+variable "twilio_function_name" { type = string }
+variable "auth0_secret"         { type = string }
 
 resource "twilio_serverless_service" "main" {
-  friendly_name = var.name
-  unique_name   = var.name
+  friendly_name = var.twilio_function_name
+  unique_name   = var.twilio_function_name
 }
 
 resource "twilio_serverless_function" "auth0_log_stream" {
@@ -80,11 +80,11 @@ resource "twilio_serverless_variable" "auth0_secret" {
   value           = var.auth0_secret
 }
 
-resource "twilio_serverless_variable" "name" {
+resource "twilio_serverless_variable" "twilio_function_name" {
   service_sid     = twilio_serverless_service.main.sid
   environment_sid = twilio_serverless_environment.dev.sid
-  key             = "name"
-  value           = var.name
+  key             = "twilio_function_name"
+  value           = var.twilio_function_name
 }
 
 resource "twilio_serverless_build" "deployment_build" {

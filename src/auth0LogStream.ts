@@ -41,8 +41,9 @@ const approve = async (context: Context, event: Event) => {
 exports.handler = async (context: Context, event: Event, callback: Function) => {
   if (event.request.headers.authorization !== context.AUTH0_SECRET) {
     const response = new Twilio.Response();
+    response.appendHeader('Content-Type', 'application/json');
     response.setStatusCode(401);
-    response.setBody(JSON.stringify({ message: 'Unauthorized' }));
+    response.setBody({ message: 'Unauthorized' });
     return callback(null, response);
   }
   let message: string;
@@ -53,7 +54,8 @@ exports.handler = async (context: Context, event: Event, callback: Function) => 
     message = 'Ignored';
   }
   const response = new Twilio.Response();
+  response.appendHeader('Content-Type', 'application/json');
   response.setStatusCode(200);
-  response.setBody(JSON.stringify({ message }));
+  response.setBody({ message });
   return callback(null, response);
 };
