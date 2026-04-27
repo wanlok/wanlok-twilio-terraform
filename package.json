@@ -10,9 +10,11 @@
   "scripts": {
     "deploy:a": "tsc && terraform apply -var-file='terraform_a.tfvars' -state='terraform_a.tfstate' -auto-approve",
     "deploy:b": "tsc && terraform apply -var-file='terraform_b.tfvars' -state='terraform_b.tfstate' -auto-approve",
-    "deploy": "npm run deploy:a && npm run deploy:b",
+    "deploy:c": "tsc && terraform apply -var-file='terraform_c.tfvars' -state='terraform_c.tfstate' -auto-approve",
+    "deploy": "npm run deploy:a && npm run deploy:b && npm run deploy:c",
     "destroy:a": "terraform destroy -var-file='terraform_a.tfvars' -state='terraform_a.tfstate' -auto-approve",
     "destroy:b": "terraform destroy -var-file='terraform_b.tfvars' -state='terraform_b.tfstate' -auto-approve",
-    "destroy": "npm run destroy:a && npm run destroy:b"
+    "destroy:c": "terraform destroy -var-file='terraform_c.tfvars' -state='terraform_c.tfstate' -auto-approve",
+    "destroy": "npm run destroy:a && npm run destroy:b && npm run destroy:c"
   }
 }
