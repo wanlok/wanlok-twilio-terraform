@@ -23,8 +23,8 @@ variable "auth0_secret"       { type = string }
 variable "name"               { type = string }
 
 resource "twilio_serverless_service" "main" {
-  friendly_name = "wanlok-twilio-terraform"
-  unique_name   = "wanlok-twilio-terraform"
+  friendly_name = var.name
+  unique_name   = var.name
 }
 
 resource "twilio_serverless_function" "auth0_log_stream" {

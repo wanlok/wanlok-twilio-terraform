@@ -8,6 +8,11 @@
     "typescript": "^6.0.3"
   },
   "scripts": {
-    "deploy": "tsc && terraform apply -auto-approve"
+    "deploy:a": "tsc && terraform apply -var-file='terraform_a.tfvars' -state='terraform_a.tfstate' -auto-approve",
+    "deploy:b": "tsc && terraform apply -var-file='terraform_b.tfvars' -state='terraform_b.tfstate' -auto-approve",
+    "deploy": "npm run deploy:a && npm run deploy:b",
+    "destroy:a": "terraform destroy -var-file='terraform_a.tfvars' -state='terraform_a.tfstate' -auto-approve",
+    "destroy:b": "terraform destroy -var-file='terraform_b.tfvars' -state='terraform_b.tfstate' -auto-approve",
+    "destroy": "npm run destroy:a && npm run destroy:b"
   }
 }

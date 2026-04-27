@@ -1,12 +1,8 @@
 *.tfstate
 *.tfstate.backup
-
+*.tfvars
 .terraform/
 .terraform.lock.hcl
-
 dist/
 node_modules/
-
 .DS_Store
-
-terraform.tfvars
